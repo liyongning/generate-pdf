@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import { footerTemplate, headerTemplate } from "./header-footer-template.mjs";
 
 /**
  * 生成 PDF 文件
@@ -44,6 +45,11 @@ async function generatePDF() {
       bottom: 40,
       left: 40
     },
+    // 开启页眉、页脚
+    displayHeaderFooter: true,
+    // 通过 HTML 模版字符串自定义页眉、页脚
+    headerTemplate: headerTemplate(),
+    footerTemplate: footerTemplate(),
     // 打印的时候打印背景色
     printBackground: true,
   })
