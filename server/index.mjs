@@ -53,6 +53,20 @@ async function generatePDF() {
     // 打印的时候打印背景色
     printBackground: true,
   })
+  // 封面
+  await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/cover.html')
+  await page.pdf({
+    path: './cover.pdf',
+    format: 'A4',
+    printBackground: true
+  })
+  // 尾页
+  await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/last-page.html')
+  await page.pdf({
+    path: './last-page.pdf',
+    format: 'A4',
+    printBackground: true
+  })
   // 关闭浏览器
   await browser.close()
 }
