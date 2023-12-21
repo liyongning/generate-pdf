@@ -1,5 +1,7 @@
 import puppeteer from "puppeteer";
 import { footerTemplate, headerTemplate } from "./header-footer-template.mjs";
+import mergePDF from "./merge-pdf.mjs";
+import { writeFileSync } from 'fs'
 
 /**
  * 生成 PDF 文件
@@ -32,10 +34,8 @@ async function generatePDF() {
       scrollPage()
     })
   })
-  // 将当前页打印成 PDF 文件
-  await page.pdf({
-    // PDF 文件的存储路径，如果不设置则会以二进制的形式放到内存中
-    path: './news.pdf',
+  // 将当前页打印成 PDF 文件。不设置 path，文件将会保存在内存中
+  const contentBuffer = await page.pdf({
     // 以 A4 纸的尺寸来打印 PDF
     format: 'A4',
     // 设置 PDF 文件的页边距，避免内容完全贴边
@@ -55,18 +55,20 @@ async function generatePDF() {
   })
   // 封面
   await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/cover.html')
-  await page.pdf({
-    path: './cover.pdf',
+  const coverBuffer = await page.pdf({
     format: 'A4',
     printBackground: true
   })
   // 尾页
   await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/last-page.html')
-  await page.pdf({
-    path: './last-page.pdf',
+  const lastPageBuffer = await page.pdf({
     format: 'A4',
     printBackground: true
   })
+  // 合并三份 PDF
+  const pdfBuffer = await mergePDF(coverBuffer, contentBuffer, lastPageBuffer)
+  // 将合并后的终版 PDF 文件写盘
+  writeFileSync('./final.pdf', pdfBuffer)
   // 关闭浏览器
   await browser.close()
 }
