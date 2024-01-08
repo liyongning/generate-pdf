@@ -28,6 +28,8 @@ async function generatePDF() {
             scrollPage()
           }, 500)
         } else {
+          // 滚动回顶部，不然计算目录项的页码会有问题
+          document.documentElement.scrollTo(0, 0)
           resolve()
         }
       }
@@ -108,9 +110,18 @@ async function generatePDF() {
       // 标题 和 页码之间的分割符号 —— .........
       const sepratorDiv = document.createElement('div')
       sepratorDiv.classList.add('dirItemWrapper__sepratorDiv')
-      // 页码
+      /**
+       * 页码
+       */
       const pageNumSpan = document.createElement('span')
-      pageNumSpan.appendChild(document.createTextNode('页码'))
+      // 获取当前锚点元素 
+      const anchorEl = document.querySelector(`#${id}`)
+      // 得到锚点元素距离顶部的像素
+      const { y } = anchorEl.getBoundingClientRect()
+      // 假设 PDF 一页的像素高度是 1123px，从而计算出当前锚点在第几页
+      const pageNum = Math.ceil(y / 1123)
+      // 加 1 是因为目录页占了一页，所以新闻页算是从第二页开始的
+      pageNumSpan.appendChild(document.createTextNode(pageNum + 1))
 
       // 将三个子元素添加到父元素内
       dirItemWrapper.appendChild(titleA)
