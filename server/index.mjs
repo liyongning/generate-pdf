@@ -12,7 +12,9 @@ async function generatePDF() {
   // 打开一个新的 Tab 页
   const page = await browser.newPage()
   // 在当前 Tab 页上打开 “百度新闻” 页。第二个配置参数，意思是当页面触发 load 事件，并且 500ms 内没有新的网络连接，则继续往下执行
-  await page.goto('https://news.baidu.com', { waitUntil: ['load', 'networkidle0'] })
+  // await page.goto('https://news.baidu.com', { waitUntil: ['load', 'networkidle0'] })
+  // 目录项页码准确性
+  await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/exact-page-num.html', { waitUntil: ['load', 'networkidle0'] })
   // 滚动页面，加载完整内容。evaluate 的回调函数会在浏览器中执行，evalaute 方法的返回值是回调函数的返回值
   await page.evaluate(function () {
     return new Promise(resolve => {
@@ -42,19 +44,23 @@ async function generatePDF() {
    *    这里为了展示核心逻辑，前端代码尽可能简洁，不影响主逻辑的理解
    */
   // 目录配置，通过 page.evaluate 方法的第二个参数传递会回调函数
+  // const dirConfig = [
+  //   { title: '热点新闻', id: 'focus-top' },
+  //   { title: '北京新闻', id: "local_news" },
+  //   { title: '视野', id: "guonei" },
+  //   { title: '天下', id: 'guojie' },
+  //   { title: '体育', id: 'tiyu' },
+  //   { title: '财经', id: 'caijing' },
+  //   { title: '科技', id: 'col-tech' },
+  //   { title: '军事', id: 'junshi' },
+  //   { title: '互联网', id: 'hulianwang' },
+  //   { title: '搜索', id: 'col-discovery' },
+  //   { title: '健康', id: 'col-healthy' },
+  //   { title: '图片新闻', id: 'tupianxinwen' },
+  // ]
   const dirConfig = [
-    { title: '热点新闻', id: 'focus-top' },
-    { title: '北京新闻', id: "local_news" },
-    { title: '视野', id: "guonei" },
-    { title: '天下', id: 'guojie' },
-    { title: '体育', id: 'tiyu' },
-    { title: '财经', id: 'caijing' },
-    { title: '科技', id: 'col-tech' },
-    { title: '军事', id: 'junshi' },
-    { title: '互联网', id: 'hulianwang' },
-    { title: '搜索', id: 'col-discovery' },
-    { title: '健康', id: 'col-healthy' },
-    { title: '图片新闻', id: 'tupianxinwen' },
+    { title: '锚点 1', id: 'anchor1' },
+    { title: '锚点 2', id: 'anchor2' },
   ]
   // 通过 DOM 操作为新闻页添加 目录 DOM
   await page.evaluate(function (dirConfig) {
@@ -118,8 +124,12 @@ async function generatePDF() {
       const anchorEl = document.querySelector(`#${id}`)
       // 得到锚点元素距离顶部的像素
       const { y } = anchorEl.getBoundingClientRect()
-      // 假设 PDF 一页的像素高度是 1123px，从而计算出当前锚点在第几页
-      const pageNum = Math.ceil(y / 1123)
+      /**
+       * 假设 PDF 一页的像素高度是 1524px，从而计算出当前锚点在第几页
+       *    为什么是 1524，而不是 1684 ？
+       * 因为页面中的页眉、页脚是通过 puppeteer 直接生成的，没有通过前端开发，所以前端开发时，页面高度需要减去页眉、页脚的高度，即 1684 - 160 = 1524
+       */
+      const pageNum = Math.ceil(y / 1524) || 1
       // 加 1 是因为目录页占了一页，所以新闻页算是从第二页开始的
       pageNumSpan.appendChild(document.createTextNode(pageNum + 1))
 
@@ -149,10 +159,10 @@ async function generatePDF() {
     format: 'A4',
     // 设置 PDF 文件的页边距，避免内容完全贴边
     margin: {
-      top: 40,
-      right: 40,
-      bottom: 40,
-      left: 40
+      top: 80,
+      right: 80,
+      bottom: 80,
+      left: 80
     },
     // 开启页眉、页脚
     displayHeaderFooter: true,
