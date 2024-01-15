@@ -11,6 +11,8 @@ async function generatePDF() {
   const browser = await puppeteer.launch({ headless: false, devtools: true })
   // 打开一个新的 Tab 页
   const page = await browser.newPage()
+  // 页面缩放比例
+  const scale = 1123 / 1684
   // 在当前 Tab 页上打开 “百度新闻” 页。第二个配置参数，意思是当页面触发 load 事件，并且 500ms 内没有新的网络连接，则继续往下执行
   // await page.goto('https://news.baidu.com', { waitUntil: ['load', 'networkidle0'] })
   // 目录项页码准确性
@@ -157,12 +159,13 @@ async function generatePDF() {
   const contentBuffer = await page.pdf({
     // 以 A4 纸的尺寸来打印 PDF
     format: 'A4',
+    scale,
     // 设置 PDF 文件的页边距，避免内容完全贴边
     margin: {
-      top: 80,
-      right: 80,
-      bottom: 80,
-      left: 80
+      top: 80 * scale,
+      right: 80 * scale,
+      bottom: 80 * scale,
+      left: 80 * scale
     },
     // 开启页眉、页脚
     displayHeaderFooter: true,
