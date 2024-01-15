@@ -106,6 +106,9 @@ async function generatePDF() {
      * 目录项
      */
     const fragement = document.createDocumentFragment()
+    // 补充高度。用来补充因为 page-break: page 样式而出现的空白区域
+    let patchHeight = 0
+
     for (let i = 0, len = dirConfig.length; i < len; i++) {
       const { title, id } = dirConfig[i]
 
@@ -131,7 +134,12 @@ async function generatePDF() {
        *    为什么是 1524，而不是 1684 ？
        * 因为页面中的页眉、页脚是通过 puppeteer 直接生成的，没有通过前端开发，所以前端开发时，页面高度需要减去页眉、页脚的高度，即 1684 - 160 = 1524
        */
-      const pageNum = Math.ceil(y / 1524) || 1
+      // 锚点当前在 PDF 文件中的高度 = 实际的高度 + 之前补充的高度
+      const existHeight = y + patchHeight
+      // 计算当前锚点应该补充多少高度
+      patchHeight += existHeight % 1524
+      // (当前高度 + 补充高度) / 1524 来计算实际的页码
+      const pageNum = Math.ceil((existHeight + patchHeight) / 1524) || 1
       // 加 1 是因为目录页占了一页，所以新闻页算是从第二页开始的
       pageNumSpan.appendChild(document.createTextNode(pageNum + 1))
 
