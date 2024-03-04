@@ -16,7 +16,7 @@ function delay(milliseconds) {
 /**
  * 生成 PDF 文件
  */
-async function generatePDF() {
+export async function generatePDF() {
   // 启动浏览器。为了演示效果，暂时关闭无头模式，以浏览器界面形式运行
   const browser = await puppeteer.launch({ headless: false, devtools: true })
   // 打开一个新的 Tab 页
@@ -460,4 +460,4 @@ async function generatePDF() {
   await browser.close()
 }
 
-generatePDF()
+// generatePDF()
