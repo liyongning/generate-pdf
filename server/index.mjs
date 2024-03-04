@@ -16,7 +16,8 @@ function delay(milliseconds) {
 /**
  * 生成 PDF 文件
  */
-export async function generatePDF() {
+export async function generatePDF(configData) {
+  const { dir, pageInfo } = configData
   // 启动浏览器。为了演示效果，暂时关闭无头模式，以浏览器界面形式运行
   const browser = await puppeteer.launch({ headless: false, devtools: true })
   // 打开一个新的 Tab 页
@@ -26,7 +27,7 @@ export async function generatePDF() {
   // 页面缩放比例
   const scale = 1123 / 1684
   // 内容页 URL 列表
-  const contentPages = ['file:///Users/liyongning/studyspace/generate-pdf/fe/exact-page-num.html', 'file:///Users/liyongning/studyspace/generate-pdf/fe/second-content-page.html']
+  const contentPages = pageInfo.content
   // 保存每个内容页的 HTML 字符串，每个元素格式为 { cssPrefix: 'sandbox-uuid', content: 'html字符串' }
   const pdfContentPages = []
   // 遍历内容页列表，分别打开这些页面，并获取页面的 HTML 文档
@@ -313,12 +314,7 @@ export async function generatePDF() {
    *    这里为了展示核心逻辑，前端代码尽可能简洁，不影响主逻辑的理解
    */
   // 目录配置，通过 page.evaluate 方法的第二个参数传递会回调函数
-  const dirConfig = [
-    { title: '锚点 1', id: 'anchor1' },
-    { title: '锚点 2', id: 'anchor2' },
-    { title: '第二个内容页 —— 锚点 1', id: 'second-content-page-anchor1' },
-    { title: '第二个内容页 —— 锚点 2', id: 'second-content-page-anchor2' },
-  ]
+  const dirConfig = dir
   // 通过 DOM 操作为新闻页添加 目录 DOM
   await page.evaluate(function (dirConfig) {
     /**
@@ -441,13 +437,13 @@ export async function generatePDF() {
     printBackground: true,
   })
   // 封面
-  await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/cover.html')
+  await page.goto(pageInfo.cover)
   const coverBuffer = await page.pdf({
     format: 'A4',
     printBackground: true
   })
   // 尾页
-  await page.goto('file:///Users/liyongning/studyspace/generate-pdf/fe/last-page.html')
+  await page.goto(pageInfo.lastPage)
   const lastPageBuffer = await page.pdf({
     format: 'A4',
     printBackground: true
